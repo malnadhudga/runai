@@ -14,6 +14,7 @@ class Task:
     result: str | None = None
     review_notes: str | None = None
     retries: int = 0
+    sub_tasks: list[str] = field(default_factory=list)
 
     def mark_complete(self, result: str) -> None:
         self.status = "done"
@@ -22,6 +23,11 @@ class Task:
     def mark_failed(self, error: str) -> None:
         self.status = "failed"
         self.result = error
+
+    def mark_superseded(self, replacement_ids: list[str]) -> None:
+        """Mark this task as replaced by sub-tasks from a SPLIT."""
+        self.status = "superseded"
+        self.sub_tasks = replacement_ids
 
     def to_dict(self) -> dict:
         return {
@@ -34,4 +40,5 @@ class Task:
             "result": self.result,
             "review_notes": self.review_notes,
             "retries": self.retries,
+            "sub_tasks": self.sub_tasks,
         }
