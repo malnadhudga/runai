@@ -20,37 +20,37 @@ GLOBAL_TIMEOUT = 600  # 10 minutes
 class Orchestrator:
     """Top-level loop: plan -> dispatch -> review -> assemble."""
 
-    def __init__(self, llm_client: LLMClient):
+    def __init__(self, llm_client: LLMClient, on_status_change=None):
         self.llm_client = llm_client
+        self.on_status_change = on_status_change or (lambda task_id, status: None)
         self.context_store = ContextStore()
         self.planner = Planner(llm_client)
         self.reviewer = Reviewer(llm_client)
         self.assembler = Assembler(llm_client)
         self.dispatcher = Dispatcher(llm_client, self.context_store)
 
-    def run(self, user_goal: str) -> str:
+    def run(self, user_goal: str, tasks=None) -> str:
         """Execute the full plan-dispatch-review-assemble pipeline.
 
         Args:
             user_goal: The user's coding goal in plain English.
+            tasks: Optional pre-planned task list. Plans from scratch if None.
 
         Returns:
             The final handover summary string.
         """
-        tasks = self.planner.plan(user_goal)
+        if tasks is None:
+            tasks = self.planner.plan(user_goal)
         queue = TaskQueue(tasks)
 
-        print("=== TASK PLAN ===")
         for t in tasks:
-            print(f"  {t.task_id}: {t.description}")
-        print()
+            self.on_status_change(t.task_id, "pending")
 
         start = time.time()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             while queue.has_work():
                 if time.time() - start > GLOBAL_TIMEOUT:
-                    print("Global timeout reached, stopping.")
                     break
 
                 futures: dict[concurrent.futures.Future, str] = {}
@@ -58,7 +58,7 @@ class Orchestrator:
                     task = queue.pop_ready()
                     if task is None:
                         break
-                    print(f"  >> dispatching {task.task_id}")
+                    self.on_status_change(task.task_id, "running")
                     future = executor.submit(self.dispatcher.dispatch, task)
                     futures[future] = task.task_id
 
@@ -73,10 +73,11 @@ class Orchestrator:
                     try:
                         result = future.result()
                     except Exception as e:
-                        print(f"  {task_id} CRASHED: {e}")
                         queue.mark_failed(task_id)
+                        self.on_status_change(task_id, "failed")
                         continue
 
+                    self.on_status_change(task_id, "reviewing")
                     files = self._read_output_files(result.get("output_files", []))
                     errors = self._run_output_files(result.get("output_files", []))
 
@@ -94,13 +95,13 @@ class Orchestrator:
                             result.get("output_files", []),
                         )
                         self.context_store.set(task_id, result.get("result", ""))
-                        print(f"  {task_id} ACCEPTED")
+                        self.on_status_change(task_id, "done")
                     elif task_obj.retries < MAX_RETRIES:
                         queue.requeue(task_id, explanation)
-                        print(f"  {task_id} RETRY (attempt {task_obj.retries})")
+                        self.on_status_change(task_id, "pending")
                     else:
                         queue.mark_failed(task_id)
-                        print(f"  {task_id} FAILED after {MAX_RETRIES} retries")
+                        self.on_status_change(task_id, "failed")
 
                 time.sleep(0.5)
 
