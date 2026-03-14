@@ -1,4 +1,5 @@
 import re
+from collections import Counter
 
 from crew.core.llm_client import LLMClient
 from crew.core.prompts import SLAVE_SYSTEM_PROMPT
@@ -13,18 +14,12 @@ class ReActLoop:
         self.scratchpad = scratchpad
         self.tools_dict = tools_dict
         self.done = False
+        self.stuck = False
         self.result: str | None = None
+        self.failure_report: dict | None = None
 
     def parse_tool_call(self, llm_response: str) -> tuple[str, dict] | None:
         """Extract a TOOL/ARGS block from the LLM's text response.
-
-        Expected format:
-            TOOL: <tool_name>
-            ARGS:
-            key: value
-            key: |
-              multiline content
-              more content
 
         Returns:
             (tool_name, args_dict) or None if no valid tool call found.
@@ -54,23 +49,19 @@ class ReActLoop:
         block_indent: int | None = None
 
         for line in lines:
-            # check for a new top-level key (no leading whitespace, has colon)
             top_level = re.match(r"^(\w+):\s?(.*)", line)
             if top_level:
-                # save previous key
                 if current_key is not None:
                     args[current_key] = "\n".join(current_value_lines)
                 current_key = top_level.group(1)
                 value_part = top_level.group(2).strip()
                 if value_part == "|":
-                    # block scalar follows on indented lines
                     current_value_lines = []
                     block_indent = None
                 else:
                     current_value_lines = [value_part]
                     block_indent = None
             elif current_key is not None:
-                # continuation line for block scalar
                 if block_indent is None:
                     stripped = line.lstrip()
                     if stripped:
@@ -86,6 +77,61 @@ class ReActLoop:
             args[current_key] = "\n".join(current_value_lines).rstrip("\n")
 
         return args
+
+    def _get_recent_tool_errors(self, window: int = 5) -> list[str]:
+        """Extract error strings from the last N tool result messages."""
+        tool_results = [
+            m["content"] for m in self.scratchpad.messages
+            if m["role"] == "user" and m["content"].startswith("Tool result")
+        ]
+        errors = []
+        for content in tool_results[-window:]:
+            if "error:" in content.lower():
+                errors.append(content)
+        return errors
+
+    def _detect_stuck(self) -> bool:
+        """Check if the slave is stuck and should escalate.
+
+        Returns True if any of:
+          - Same error appeared 3+ times in the last 5 tool results
+          - 5+ consecutive iterations with no new file written and no DONE
+          - Used more than 10 iterations without finishing
+        """
+        recent_errors = self._get_recent_tool_errors(window=5)
+
+        # repeated error check
+        if len(recent_errors) >= 3:
+            counts = Counter(recent_errors)
+            if counts.most_common(1)[0][1] >= 3:
+                return True
+
+        # stalled: many iterations, no files, not done
+        if self.scratchpad.iteration >= 5 and not self.scratchpad.files_written:
+            return True
+
+        # over 10 iterations is a strong signal
+        if self.scratchpad.iteration > 10:
+            return True
+
+        return False
+
+    def _build_failure_report(self) -> dict:
+        """Build a structured report about why the slave got stuck."""
+        errors = self._get_recent_tool_errors(window=10)
+        assistant_msgs = [
+            m["content"] for m in self.scratchpad.messages
+            if m["role"] == "assistant"
+        ]
+        task = self.scratchpad.task
+        return {
+            "task_id": task.task_id if task else "unknown",
+            "task_description": task.description if task else "unknown",
+            "iterations_used": self.scratchpad.iteration,
+            "errors": errors,
+            "files_written": list(self.scratchpad.files_written),
+            "last_attempts": assistant_msgs[-3:],
+        }
 
     def step(self) -> None:
         """Run one THINK → ACT → OBSERVE cycle."""
@@ -112,6 +158,10 @@ class ReActLoop:
                 "or finish with DONE: followed by your summary."
             )
             self.scratchpad.increment()
+            if self._detect_stuck():
+                self.failure_report = self._build_failure_report()
+                self.stuck = True
+                self.done = True
             return
 
         tool_name, tool_args = parsed
@@ -131,6 +181,12 @@ class ReActLoop:
         self.scratchpad.append_tool_result(tool_name, tool_result)
         self.scratchpad.increment()
 
+        # check if stuck after observe
+        if self._detect_stuck():
+            self.failure_report = self._build_failure_report()
+            self.stuck = True
+            self.done = True
+
     def is_done(self) -> bool:
         """Check if the loop should stop."""
-        return self.done or self.scratchpad.is_maxed_out()
+        return self.done or self.stuck or self.scratchpad.is_maxed_out()
