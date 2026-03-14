@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crew"
+version = "0.1.0"
+description = "A CLI tool that runs a crew of GPT-based coding agents"
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "python-dotenv",
+    "openai",
+    "google-generativeai",
+    "rich",
+]
+
+[project.scripts]
+crew = "crew.cli.main:main"
+
+[tool.setuptools.packages.find]
+include = ["crew*"]
