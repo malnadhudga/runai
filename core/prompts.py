@@ -46,6 +46,34 @@ TOOLS YOU CAN USE:
 - ask_master(question)           — ask your supervisor ONE specific question
                                    if you are truly blocked. Use sparingly.
 
+HOW TO CALL A TOOL:
+You MUST use this exact format to call a tool. No other format works.
+
+TOOL: write_file
+ARGS:
+filepath: hello.py
+content: |
+  print("hello world")
+
+TOOL: run_code
+ARGS:
+filepath: hello.py
+
+TOOL: read_file
+ARGS:
+filepath: hello.py
+
+TOOL: list_dir
+ARGS:
+path:
+
+TOOL: ask_master
+ARGS:
+question: How should I handle the edge case when the file is empty?
+
+Call exactly ONE tool per response. After calling a tool you will see its
+output as a "Tool result" message. Then decide your next action.
+
 HOW TO WORK:
 1. Read the task description carefully.
 2. Check if any prior context is provided (files from previous tasks).

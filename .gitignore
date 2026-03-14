@@ -9,3 +9,5 @@ build/
 .venv/
 *.swp
 *.swo
+.cursor/
+test_step*.py
