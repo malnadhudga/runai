@@ -20,6 +20,7 @@ STATUS_STYLE = {
     "reviewing": "bold cyan",
     "done": "bold green",
     "failed": "bold red",
+    "superseded": "dim strikethrough",
 }
 
 
@@ -47,9 +48,9 @@ def resolve_provider() -> tuple[str, str, str]:
 def build_table(task_rows: dict[str, dict]) -> Table:
     """Build a Rich Table from current task state."""
     table = Table(title="Tasks", expand=True)
-    table.add_column("ID", style="bold", width=6)
+    table.add_column("ID", style="bold", width=8)
     table.add_column("Description", ratio=3)
-    table.add_column("Status", width=12, justify="center")
+    table.add_column("Status", width=14, justify="center")
     table.add_column("Depends On", width=14)
 
     for tid, info in task_rows.items():
@@ -90,10 +91,20 @@ def main():
     task_rows: dict[str, dict] = {}
     live: Live | None = None
 
-    def on_status_change(task_id: str, status: str) -> None:
+    def on_status_change(task_id: str, status: str, **kwargs) -> None:
         if task_id not in task_rows:
-            return
-        task_rows[task_id]["status"] = status
+            description = kwargs.get("description", "")
+            depends_on = kwargs.get("depends_on", [])
+            if description:
+                task_rows[task_id] = {
+                    "description": description,
+                    "status": status,
+                    "depends_on": depends_on or [],
+                }
+            else:
+                return
+        else:
+            task_rows[task_id]["status"] = status
         if live is not None:
             live.update(build_table(task_rows))
 

@@ -31,4 +31,6 @@ class SlaveAgent:
             "task_id": self.task.task_id,
             "result": self.react_loop.result or "max iterations reached",
             "output_files": self.scratchpad.files_written,
+            "stuck": self.react_loop.stuck,
+            "failure_report": self.react_loop.failure_report,
         }
