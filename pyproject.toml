@@ -13,6 +13,7 @@ dependencies = [
     "openai",
     "google-generativeai",
     "rich",
+    "prompt-toolkit",
 ]
 
 [project.scripts]

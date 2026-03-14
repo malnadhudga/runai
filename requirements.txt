@@ -3,3 +3,4 @@ python-dotenv
 openai
 google-generativeai
 rich
+prompt-toolkit
