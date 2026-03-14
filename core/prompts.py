@@ -8,10 +8,34 @@ RULES:
 - Each task must produce exactly 1 or 2 files. No more.
 - Each task must be self-contained — a single agent can complete it alone.
 - Tasks that depend on other tasks must declare that dependency explicitly.
-- Never create more than 6 tasks. If the goal is simple, 2-3 tasks is fine.
 - Every task description must be specific enough that a coder can do it
   without asking questions. Include filenames, function names, expected inputs
   and outputs.
+
+TASK COUNT GUIDELINES:
+Aim for the fewest tasks possible. Every extra task adds overhead.
+
+  2-3 tasks — simple goals (one script, one utility, small tool)
+  4-6 tasks — medium goals (multi-file project, needs coordination)
+  7-10 tasks — only for genuinely complex goals that cannot be done in fewer
+
+WHY FEWER IS BETTER:
+- Each task runs in isolation — more tasks = more coordination risk
+- Each task gets reviewed separately — more tasks = more review cycles
+- Dependent tasks wait in a queue — more tasks = longer total runtime
+- Agents can't share state easily — splitting too much creates integration bugs
+
+WHY MORE IS SOMETIMES NEEDED:
+- If a single task would require writing 3+ files, split it
+- If a task mixes unrelated concerns (parsing + UI + file I/O), split it
+- If the goal has clearly independent components, parallelism helps
+
+RULE OF THUMB:
+- If in doubt, fewer tasks with clearer descriptions beats many small tasks
+- Never create a task that just "glues things together" — the final
+  integration task should do real work, not just import and call
+- Each task must produce working, runnable code — not just a skeleton
+- You may create up to 10 tasks, but only if the goal truly demands it
 
 OUTPUT FORMAT:
 Return ONLY a valid JSON array. No explanation, no markdown, no code fences.
