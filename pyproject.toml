@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "crew"
+name = "runai"
 version = "0.1.0"
-description = "A CLI tool that runs a crew of GPT-based coding agents"
+description = "CLI for multi-agent AI coding (planner, workers, review, assemble)"
 requires-python = ">=3.10"
 dependencies = [
     "requests",
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-crew = "crew.cli.main:main"
+runai = "runai.cli.main:main"
 
 [tool.setuptools.packages.find]
-include = ["crew*"]
+include = ["runai*"]

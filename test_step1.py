@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from crew.core.llm_client import LLMClient
+from runai.core.llm_client import LLMClient
 
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:

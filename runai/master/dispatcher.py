@@ -1,7 +1,7 @@
-from crew.core.llm_client import LLMClient
-from crew.core.task import Task
-from crew.core.context_store import ContextStore
-from crew.slave.agent import SlaveAgent
+from runai.core.llm_client import LLMClient
+from runai.core.task import Task
+from runai.core.context_store import ContextStore
+from runai.slave.agent import SlaveAgent
 
 
 class Dispatcher:

@@ -1,9 +1,9 @@
 import json
 import re
 
-from crew.core.llm_client import LLMClient
-from crew.core.prompts import FAILURE_ANALYSIS_PROMPT
-from crew.tools.read_file import read_file
+from runai.core.llm_client import LLMClient
+from runai.core.prompts import FAILURE_ANALYSIS_PROMPT
+from runai.tools.read_file import read_file
 
 
 class FailureHandler:

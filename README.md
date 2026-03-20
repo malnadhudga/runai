@@ -1,91 +1,119 @@
-# crew
+# runai
 
-A CLI tool that runs a crew of GPT-based coding agents.
+CLI for multi-agent AI coding: a planner breaks goals into tasks, workers execute them, output is reviewed and assembled.
 
-Crew uses a master/slave architecture where a planner breaks down user goals
-into atomic subtasks, dispatches them to autonomous coding agents, reviews
-their output, and assembles a final result.
+---
 
-## New user setup
+## Installation
 
-1. **Clone or download the repo** and open a terminal in the project folder.
+### 1. Clone the repo
 
-2. **Use Python 3.10+** (check with `python --version` or `python3 --version`).
+```bash
+git clone https://github.com/malnadhudga/runai.git
+cd runai
+```
 
-3. **Install the project** (recommended: use a virtualenv first):
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate   # Windows
-   # source .venv/bin/activate   # Linux / macOS
-   pip install -e .
-   ```
-
-4. **Configure API keys.** Copy `.env.example` to `.env` and add at least one key:
-   ```bash
-   # Windows
-   copy .env.example .env
-   # Linux / macOS
-   cp .env.example .env
-   ```
-   Edit `.env` and set:
-   - `GEMINI_API_KEY=...` and/or  
-   - `OPENAI_API_KEY=...`
-
-5. **Run crew** from the project folder:
-   - **Windows:** `.\crew.bat` or `python crew`
-   - **Linux / macOS:** `python crew` or `./crew` (after `chmod +x crew`)
-   - Or, if the pip `crew` script is on your PATH: `crew`
-
-   One-shot (single goal):  
-   `.\crew.bat "write a hello world script"` or `python crew "write a hello world script"`  
-   Interactive REPL (type goals and use `/files`, `/read`, `/quit`, etc.):  
-   `.\crew.bat` or `python crew` with no arguments.
-
-## Installation (reference)
+### 2. Install (one-time)
 
 ```bash
 pip install -e .
 ```
 
+The `runai` command is on your PATH after install.
+
+### 3. Add your API key
+
+Copy `.env.example` to `.env` and set at least one key:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Linux / macOS
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```
+GEMINI_API_KEY=your-key-here
+OPENAI_API_KEY=your-key-here
+```
+
+### 4. Run
+
+```bash
+runai
+```
+
+From a clone without global install, from repo root:
+
+```bash
+python -m runai.cli.main
+# or (Unix)
+chmod +x runai.sh && ./runai.sh
+```
+
+Interactive REPL opens. Type your goal and press Enter twice.
+
+One-shot (single goal):
+
+```bash
+runai "write a hello world script"
+```
+
+---
+
 ## Usage
 
-```bash
-crew
+```
+runai> Write server.py: HTTP server on port 8000...
 ```
 
-Or from the project root without needing `crew` on PATH:
+Commands inside the REPL:
 
-```bash
-python crew          # interactive REPL
-python crew "goal"   # one-shot
-.\crew.bat           # Windows interactive
-.\crew.bat "goal"    # Windows one-shot
-```
+| Command | Description |
+|---------|-------------|
+| `/files` | List files in workspace/src/ |
+| `/read <file>` | Show a file's contents |
+| `/status` | Show last task table |
+| `/model` | Show or switch model |
+| `/clear` | Clear the terminal |
+| `/quit` | Exit |
+
+---
 
 ## Architecture
 
 ```
-crew/
-├── cli/          # Command-line interface & setup
+runai/
+├── cli/          # Command-line interface
 ├── core/         # LLM client, task queue, prompts, context store
 ├── master/       # Orchestrator, planner, reviewer, assembler, dispatcher
 ├── slave/        # Autonomous coding agents & ReAct loop
-├── tools/        # File I/O, code execution, agent communication
-└── workspace/    # Working directory for agent outputs
+└── tools/        # File I/O, code execution, agent communication
+
+workspace/        # Working directory for agent outputs (repo root)
 ```
+
+---
 
 ## Configuration
 
-Copy `.env.example` to `.env` and set your API keys:
+Edit `.env` in the folder you run `runai` from:
 
-```bash
+```
 OPENAI_API_KEY=your-key-here
 GEMINI_API_KEY=your-key-here
 ```
 
+---
+
 ## Docker
 
 ```bash
-docker build -t crew .
-docker run --env-file .env -it crew
+docker build -t runai .
+docker run --env-file .env -it runai
 ```
+
+Release tags (`v*.*.*`) build and push to Artifact Registry if GitHub Actions secrets are set — see `.github/workflows/release.yml`.

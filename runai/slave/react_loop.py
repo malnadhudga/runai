@@ -1,9 +1,9 @@
 import re
 from collections import Counter
 
-from crew.core.llm_client import LLMClient
-from crew.core.prompts import SLAVE_SYSTEM_PROMPT
-from crew.slave.scratchpad import Scratchpad
+from runai.core.llm_client import LLMClient
+from runai.core.prompts import SLAVE_SYSTEM_PROMPT
+from runai.slave.scratchpad import Scratchpad
 
 
 class ReActLoop:
