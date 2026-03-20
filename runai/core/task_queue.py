@@ -1,4 +1,4 @@
-from crew.core.task import Task
+from runai.core.task import Task
 
 
 class TaskQueue:

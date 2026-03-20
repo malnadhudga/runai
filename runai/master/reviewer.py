@@ -1,5 +1,5 @@
-from crew.core.llm_client import LLMClient
-from crew.core.prompts import REVIEWER_SYSTEM_PROMPT
+from runai.core.llm_client import LLMClient
+from runai.core.prompts import REVIEWER_SYSTEM_PROMPT
 
 
 class Reviewer:

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="crew",
+    name="runai",
     version="0.1.0",
     packages=find_packages(),
     install_requires=[
@@ -10,11 +10,11 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'crew = crew.cli.main:main',
+            'runai = runai.cli.main:main',
         ],
     },
     author="Ketan Hegde",
-    description="A CLI tool that runs a crew of GPT-based coding agents",
+    description="CLI for multi-agent AI coding (planner, workers, review, assemble)",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     classifiers=[

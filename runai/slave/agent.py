@@ -1,8 +1,8 @@
-from crew.core.llm_client import LLMClient
-from crew.core.task import Task
-from crew.slave.scratchpad import Scratchpad
-from crew.slave.react_loop import ReActLoop
-from crew.tools import TOOLS
+from runai.core.llm_client import LLMClient
+from runai.core.task import Task
+from runai.slave.scratchpad import Scratchpad
+from runai.slave.react_loop import ReActLoop
+from runai.tools import TOOLS
 
 
 class SlaveAgent:

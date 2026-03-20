@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from crew.core.llm_client import LLMClient
-from crew.core.prompts import ASK_MASTER_SYSTEM_PROMPT
+from runai.core.llm_client import LLMClient
+from runai.core.prompts import ASK_MASTER_SYSTEM_PROMPT
 
 
 def ask_master(question: str) -> str:
