@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from crew.core.llm_client import LLMClient
-from crew.core.task_queue import TaskQueue
-from crew.core.context_store import ContextStore
-from crew.master.planner import Planner
+from runai.core.llm_client import LLMClient
+from runai.core.task_queue import TaskQueue
+from runai.core.context_store import ContextStore
+from runai.master.planner import Planner
 
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:

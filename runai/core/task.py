@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Task:
-    """Represents a single atomic subtask in the crew system."""
+    """Represents a single atomic subtask in the RunAI pipeline."""
 
     task_id: str
     description: str

@@ -9,7 +9,7 @@ env:
   REGISTRY: us-central1-docker.pkg.dev
   PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
   REPOSITORY: runai
-  IMAGE: crew
+  IMAGE: runai
 
 jobs:
   build-and-push:

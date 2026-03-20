@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 
-WORKDIR /crew
+WORKDIR /app
 
 ENV PIP_NO_INPUT=1 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -17,4 +17,4 @@ RUN /venv/bin/pip install --no-deps .
 
 ENV PATH="/venv/bin:$PATH"
 
-ENTRYPOINT ["crew"]
+ENTRYPOINT ["runai"]

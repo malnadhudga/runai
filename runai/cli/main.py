@@ -21,10 +21,10 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 
-from crew.core.llm_client import LLMClient
-from crew.master.orchestrator import Orchestrator
-from crew.tools.read_file import read_file
-from crew.tools.list_dir import list_dir
+from runai.core.llm_client import LLMClient
+from runai.master.orchestrator import Orchestrator
+from runai.tools.read_file import read_file
+from runai.tools.list_dir import list_dir
 
 console = Console()
 
@@ -253,7 +253,7 @@ def _read_multiline_fallback() -> str | None:
     first = True
     while True:
         try:
-            prompt = "crew> " if first else "...   "
+            prompt = "runai> " if first else "...   "
             line = input(prompt)
         except (KeyboardInterrupt, EOFError):
             return None
@@ -289,7 +289,7 @@ def read_multiline_input(session: PromptSession | None) -> str | None:
 
     while True:
         try:
-            prompt = "[bold cyan]crew> [/bold cyan]" if first else "[dim]...   [/dim]"
+            prompt = "runai> " if first else "...   "
             line = session.prompt(prompt)
         except (KeyboardInterrupt, EOFError):
             return None
@@ -319,7 +319,7 @@ def interactive_mode(console: Console) -> None:
     """Run the interactive REPL loop."""
     console.print(
         Panel(
-            "[bold]crew[/bold]  —  multi-agent coding system",
+            "[bold]runai[/bold]  —  multi-agent coding system",
             style="blue",
             expand=False,
         )
@@ -342,7 +342,7 @@ def interactive_mode(console: Console) -> None:
     llm_client = LLMClient(provider=provider, model=model, api_key=api_key)
     llm_client_ref: list[LLMClient] = [llm_client]
 
-    history_path = os.path.expanduser("~/.crew_history")
+    history_path = os.path.expanduser("~/.runai_history")
     try:
         session: PromptSession | None = PromptSession(history=FileHistory(history_path))
     except NoConsoleScreenBufferError:
@@ -385,8 +385,8 @@ def main() -> None:
 
     if len(sys.argv) > 1 or not sys.stdin.isatty():
         parser = argparse.ArgumentParser(
-            prog="crew",
-            description="Run a crew of AI coding agents on a goal.",
+            prog="runai",
+            description="Run multi-agent AI coding on a goal.",
         )
         parser.add_argument("goal", nargs="?", help="The coding goal to accomplish.")
         args = parser.parse_args()
@@ -399,7 +399,7 @@ def main() -> None:
             sys.exit(1)
 
         console.print(
-            Panel("[bold]crew[/bold]  —  multi-agent coding system", style="blue")
+            Panel("[bold]runai[/bold]  —  multi-agent coding system", style="blue")
         )
         console.print(f"[bold]Goal:[/bold] {goal}\n")
 

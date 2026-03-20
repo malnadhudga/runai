@@ -1,9 +1,9 @@
 import json
 import re
 
-from crew.core.llm_client import LLMClient
-from crew.core.task import Task
-from crew.core.prompts import PLANNER_SYSTEM_PROMPT
+from runai.core.llm_client import LLMClient
+from runai.core.task import Task
+from runai.core.prompts import PLANNER_SYSTEM_PROMPT
 
 
 class Planner:

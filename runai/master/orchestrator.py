@@ -2,17 +2,17 @@ import os
 import time
 import concurrent.futures
 
-from crew.core.llm_client import LLMClient
-from crew.core.task import Task
-from crew.core.task_queue import TaskQueue
-from crew.core.context_store import ContextStore
-from crew.master.planner import Planner
-from crew.master.reviewer import Reviewer
-from crew.master.assembler import Assembler
-from crew.master.dispatcher import Dispatcher
-from crew.master.failure_handler import FailureHandler
-from crew.tools.read_file import read_file
-from crew.tools.run_code import run_code
+from runai.core.llm_client import LLMClient
+from runai.core.task import Task
+from runai.core.task_queue import TaskQueue
+from runai.core.context_store import ContextStore
+from runai.master.planner import Planner
+from runai.master.reviewer import Reviewer
+from runai.master.assembler import Assembler
+from runai.master.dispatcher import Dispatcher
+from runai.master.failure_handler import FailureHandler
+from runai.tools.read_file import read_file
+from runai.tools.run_code import run_code
 
 
 MAX_RETRIES = 3

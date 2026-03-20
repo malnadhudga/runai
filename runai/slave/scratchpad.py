@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from crew.core.task import Task
+    from runai.core.task import Task
 
 
 class Scratchpad:
