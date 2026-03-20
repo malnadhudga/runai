@@ -1,0 +1,16 @@
+.git/
+.github/
+.cursor/
+.venv/
+workspace/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.env
+*.swp
+*.swo
+test_step*.py
+README.md
