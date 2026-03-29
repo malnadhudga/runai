@@ -21,7 +21,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 
-from runai.core.llm_client import LLMClient
+from runai.core.llm_client import DEFAULT_GEMINI_MODEL, LLMClient
 from runai.master.orchestrator import Orchestrator
 from runai.tools.read_file import read_file
 from runai.tools.list_dir import list_dir
@@ -38,32 +38,41 @@ STATUS_STYLE = {
 }
 
 MODEL_TO_PROVIDER = {
-    "gemini-2.0-flash": "gemini",
-    "gemini-2.5-flash": "gemini",
-    "gemma-3-4b-it": "gemini",
+    DEFAULT_GEMINI_MODEL: "gemini",
     "gpt-4o-mini": "openai",
     "gpt-4o": "openai",
 }
 
 
 def resolve_provider() -> tuple[str, str, str]:
-    """Pick provider/model/key based on what's in .env.
+    """Pick provider/model/key from the environment.
+
+    Gemini: local ``GEMINI_API_KEY`` wins — calls Google directly. The proxy is
+    used only when that key is absent and ``RUNAI_GEMINI_PROXY_URL`` is set
+    (platform key on the server).
 
     Returns:
-        (provider, model, api_key)
+        (provider, model, api_key) — ``api_key`` empty string for proxy-only
+        Gemini mode.
 
     Raises:
-        SystemExit if no key is found.
+        SystemExit if nothing is configured.
     """
-    gemini_key = os.getenv("GEMINI_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
+    gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+    gemini_proxy = (os.getenv("RUNAI_GEMINI_PROXY_URL") or "").strip()
+    openai_key = (os.getenv("OPENAI_API_KEY") or "").strip()
 
     if gemini_key:
-        return ("gemini", "gemma-3-4b-it", gemini_key)
+        return ("gemini", DEFAULT_GEMINI_MODEL, gemini_key)
+    if gemini_proxy:
+        return ("gemini", DEFAULT_GEMINI_MODEL, "")
     if openai_key:
         return ("openai", "gpt-4o-mini", openai_key)
 
-    console.print("[red]No API key found.[/red] Set GEMINI_API_KEY or OPENAI_API_KEY in .env")
+    console.print(
+        "[red]No API config found.[/red] Set GEMINI_API_KEY, RUNAI_GEMINI_PROXY_URL, "
+        "or OPENAI_API_KEY (see .env.example)."
+    )
     sys.exit(1)
 
 
@@ -210,11 +219,21 @@ def handle_command(
             )
             return None
         provider = MODEL_TO_PROVIDER[name]
-        key_var = "GEMINI_API_KEY" if provider == "gemini" else "OPENAI_API_KEY"
-        api_key = os.getenv(key_var)
-        if not api_key:
-            console.print(f"[red]No API key for {provider}. Set {key_var} in .env.[/red]")
-            return None
+        if provider == "gemini":
+            api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+            proxy = (os.getenv("RUNAI_GEMINI_PROXY_URL") or "").strip()
+            if not api_key and not proxy:
+                console.print(
+                    "[red]No Gemini config.[/red] Set GEMINI_API_KEY or RUNAI_GEMINI_PROXY_URL."
+                )
+                return None
+            if not api_key:
+                api_key = ""
+        else:
+            api_key = (os.getenv("OPENAI_API_KEY") or "").strip()
+            if not api_key:
+                console.print("[red]No API key for openai. Set OPENAI_API_KEY in .env.[/red]")
+                return None
         config["provider"] = provider
         config["model"] = name
         config["api_key"] = api_key

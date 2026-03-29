@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from runai.core.llm_client import LLMClient
+from runai.core.llm_client import DEFAULT_GEMINI_MODEL, LLMClient
 from runai.core.task_queue import TaskQueue
 from runai.core.context_store import ContextStore
 from runai.master.planner import Planner
@@ -13,7 +13,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise RuntimeError("GEMINI_API_KEY not found in .env file")
 
-llm_client = LLMClient(provider="gemini", model="gemma-3-1b-it", api_key=api_key)
+llm_client = LLMClient(provider="gemini", model=DEFAULT_GEMINI_MODEL, api_key=api_key)
 planner = Planner(llm_client)
 
 print("--- Planning ---")
