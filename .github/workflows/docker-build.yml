@@ -1,0 +1,33 @@
+# Disabled for automatic releases: we no longer push images to Google Artifact Registry.
+# Optional manual image build: Actions → "Docker build" → Run workflow.
+name: Docker build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build image (manual only)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: local/runai:build
+          outputs: type=docker,dest=/tmp/runai-image.tar
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Previously: upload tarball for docker-push.yml → Artifact Registry (disabled).

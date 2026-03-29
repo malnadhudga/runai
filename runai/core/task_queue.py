@@ -54,6 +54,16 @@ class TaskQueue:
         task = self.running.pop(task_id)
         task.status = "failed"
         self.failed.append(task)
+        self._cascade_fail(task_id)
+
+    def _cascade_fail(self, failed_id: str) -> None:
+        """Fail all pending tasks that (transitively) depend on a failed task."""
+        dependents = [t for t in self.pending if failed_id in t.depends_on]
+        for t in dependents:
+            self.pending.remove(t)
+            t.status = "failed"
+            self.failed.append(t)
+            self._cascade_fail(t.task_id)
 
     def mark_superseded(self, task_id: str) -> None:
         """Move a running task to completed as superseded (replaced by sub-tasks)."""

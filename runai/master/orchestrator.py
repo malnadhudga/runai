@@ -69,6 +69,10 @@ class Orchestrator:
                     futures[future] = task.task_id
 
                 if not futures:
+                    # No tasks could be dispatched and nothing is running →
+                    # pending tasks are blocked by failed deps (deadlock). Stop.
+                    if not queue.running:
+                        break
                     time.sleep(0.5)
                     continue
 
