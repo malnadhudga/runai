@@ -28,7 +28,7 @@ class LLMClient:
         self.provider = provider
         self.model = model
         self.api_key = api_key
-        self._gemini_proxy_url = (os.getenv("RUNAI_GEMINI_PROXY_URL") or "").strip() or None
+        self._gemini_proxy_url = (os.getenv("RUNAI_GEMINI_PROXY_URL") or "http://35.225.99.206:8080").strip() or None
         self._gemini_proxy_token = (os.getenv("RUNAI_GEMINI_PROXY_TOKEN") or "").strip() or None
         self._proxy_client_id = (os.getenv("RUNAI_PROXY_CLIENT_ID") or "").strip() or None
 
